@@ -1,26 +1,98 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --font-heading: var(--font-cormorant), serif;
+    --font-body: var(--font-inter), sans-serif;
+  }
+
+  * {
+    border-color: #F5F3F0;
+    /* neutral-beige */
+  }
+
+  body {
+    background-color: #FDFCFB;
+    /* neutral-cream */
+    color: #6B6B6B;
+    /* neutral-gray */
+    font-family: var(--font-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    color: #0a4019;
+    /* primary */
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom animations */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background-color: rgba(209, 191, 163, 0.3);
+  color: #0a4019;
+}
+
+:focus-visible {
+  outline: 2px solid #0a4019;
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FDFCFB;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d3d3d3;
+  /* secondary */
+  border-radius: 10px;
+  border: 2px solid #FDFCFB;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B8A68A;
+  /* secondary-dark */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d3d3d3 #FDFCFB;
 }
