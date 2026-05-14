@@ -63,7 +63,7 @@ export function resolveImageUrl(src, placeholder = "https://images.unsplash.com/
     if (imageUrl.startsWith('http')) {
         // Handle legacy localhost URLs in the production database
         if (process.env.NODE_ENV === 'production' && imageUrl.includes('localhost:5000')) {
-            return imageUrl.replace(/https?:\/\/localhost:5000/, 'https://store-backend-neon.vercel.app');
+            return imageUrl.replace(/https?:\/\/localhost:5000/, process.env.NEXT_PUBLIC_API_URL || 'https://store-backend-neon.vercel.app');
         }
         return imageUrl;
     }

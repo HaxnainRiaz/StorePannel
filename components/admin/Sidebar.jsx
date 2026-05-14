@@ -119,17 +119,6 @@ const Sidebar = () => {
                             <p className="text-[10px] text-[#d3d3d3] tracking-[0.3em] uppercase mt-2 font-bold opacity-70">Admin Core</p>
                         </div>
                     </Link>
-
-                    <div className="px-4 py-3 mb-6 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-emerald-500/20">
-                            <Truck size={16} />
-                        </div>
-                        <div className="min-w-0">
-                            <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest leading-none mb-1">Logistics Active</p>
-                            <p className="text-[9px] text-[#d3d3d3]/50 font-bold uppercase tracking-tight truncate">PostEx API Integrated</p>
-                        </div>
-                    </div>
-
                     <nav className="flex-1 space-y-6 overflow-y-auto custom-scrollbar pr-2 -mr-2 pb-8">
                         {sections.map((section, idx) => (
                             <div key={idx} className="space-y-1">
@@ -158,15 +147,6 @@ const Sidebar = () => {
                     </nav>
 
                     <div className="pt-6 border-t border-white/10 mt-6 pb-2">
-                        <div className="flex items-center gap-3 px-4 mb-6">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#d3d3d3] to-[#B8A68A] flex items-center justify-center text-[#0a4019] font-bold text-sm shadow-inner overflow-hidden border border-white/20">
-                                <img src={user?.avatar || "https://ui-avatars.com/api/?name=Admin"} alt="Admin" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-bold text-white truncate">{user?.name || "Admin"}</p>
-                                <p className="text-[10px] font-bold text-[#d3d3d3] uppercase tracking-widest opacity-80">{user?.role || "Manager"}</p>
-                            </div>
-                        </div>
                         <button
                             onClick={logout}
                             className="flex items-center gap-3 w-full px-4 py-3 text-[#F5F3F0]/50 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-300 group"

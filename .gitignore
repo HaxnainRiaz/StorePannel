@@ -12,7 +12,8 @@
 
 # testing
 /coverage
-
+.env.example
+.env
 # next.js
 /.next/
 /out/
