@@ -33,33 +33,45 @@ export const AdminProvider = ({ children }) => {
     }, []);
 
     const adminRequest = useCallback(async (url, method = 'GET', body = null) => {
-        if (typeof window === 'undefined') return null;
-        
-        const currentToken = localStorage.getItem('token');
-        if (!currentToken) return null;
-
         const options = {
             method,
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${currentToken}`
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            cache: 'no-store'
+            ...(body && { body: JSON.stringify(body) })
         };
-        if (body) options.body = JSON.stringify(body);
 
         try {
             const res = await fetch(`${API_URL}${url}`, options);
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            const data = await res.json();
+            
+            // Check if response is JSON before parsing
+            const contentType = res.headers.get("content-type");
+            let data = {};
+            
+            if (contentType && contentType.includes("application/json")) {
+                data = await res.json();
+            } else {
+                // If not JSON (likely 404 or server error), consume as text but don't parse
+                const text = await res.text();
+                console.warn(`Non-JSON response from ${url}:`, text.slice(0, 100));
+            }
+            
+            if (!res.ok) {
+                return { 
+                    success: false, 
+                    message: data.message || `Error ${res.status}: ${res.statusText}` 
+                };
+            }
+            
             return data;
         } catch (err) {
             console.error(`Request failed: ${url}`, err);
-            return { success: false, message: 'Server connection failed' };
+            return { success: false, message: 'Network error or server is offline' };
         }
     }, []);
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (options = { forceAll: false }) => {
         if (!token) {
             setLoading(false);
             return;
@@ -69,12 +81,15 @@ export const AdminProvider = ({ children }) => {
         setError(null);
 
         try {
-            // Optimized: Set state as data arrives using independent promises
-            // This prevents one slow endpoint from holding up the entire dashboard
-            const fetchActions = [
-                { key: 'products', action: () => adminRequest('/products'), setter: setProducts },
+            // Essential data for the dashboard
+            const essentialActions = [
                 { key: 'stats', action: () => adminRequest('/stats/dashboard'), setter: setStats },
-                { key: 'orders', action: () => adminRequest('/orders'), setter: setOrders },
+                { key: 'products', action: () => adminRequest('/products'), setter: setProducts },
+                { key: 'orders', action: () => adminRequest('/orders'), setter: setOrders }
+            ];
+
+            // Other data that can be lazy loaded
+            const lazyActions = [
                 { key: 'users', action: () => adminRequest('/users'), setter: setCustomers },
                 { key: 'tickets', action: () => adminRequest('/support-tickets'), setter: setSupportTickets },
                 { key: 'settings', action: () => adminRequest('/settings'), setter: setSettings },
@@ -87,8 +102,10 @@ export const AdminProvider = ({ children }) => {
                 { key: 'blogs', action: () => adminRequest('/blogs'), setter: setBlogs }
             ];
 
-            // Execute all in parallel and update state immediately upon arrival
-            await Promise.allSettled(fetchActions.map(async ({ action, setter }) => {
+            const actionsToRun = options.forceAll ? [...essentialActions, ...lazyActions] : essentialActions;
+
+            // Execute in parallel and update state immediately
+            await Promise.allSettled(actionsToRun.map(async ({ action, setter }) => {
                 const res = await action();
                 if (res?.success) setter(res.data);
             }));
@@ -101,6 +118,73 @@ export const AdminProvider = ({ children }) => {
             setLoading(false);
         }
     }, [token, adminRequest]);
+
+    // Specific fetchers for pages to call
+    const fetchSupportTickets = useCallback(async () => {
+        const res = await adminRequest('/support-tickets');
+        if (res?.success) setSupportTickets(res.data);
+        return res;
+    }, [adminRequest]);
+
+    const fetchAuditLogs = useCallback(async () => {
+        const res = await adminRequest('/audit');
+        if (res?.success) setAuditLogs(res.data);
+        return res;
+    }, [adminRequest]);
+
+    const fetchCustomers = useCallback(async () => {
+        const res = await adminRequest('/users');
+        if (res?.success) setCustomers(res.data);
+        return res;
+    }, [adminRequest]);
+
+    const fetchReviews = useCallback(async () => {
+        const res = await adminRequest('/reviews');
+        if (res?.success) setReviews(res.data);
+        return res;
+    }, [adminRequest]);
+
+    const fetchBlogs = useCallback(async () => {
+        const res = await adminRequest('/blogs');
+        if (res?.success) setBlogs(res.data);
+        return res;
+    }, [adminRequest]);
+
+    const fetchNewsletter = useCallback(async () => {
+        const res = await adminRequest('/newsletter');
+        if (res?.success) setNewsletter(res.data);
+        return res;
+    }, [adminRequest]);
+
+    const fetchSettings = useCallback(async () => {
+        const res = await adminRequest('/settings');
+        if (res?.success) setSettings(res.data);
+        return res;
+    }, [adminRequest]);
+
+    const fetchInventoryData = useCallback(async () => {
+        const res = await adminRequest('/products');
+        if (res?.success) setProducts(res.data);
+        return res;
+    }, [adminRequest]);
+
+    const fetchCategories = useCallback(async () => {
+        const res = await adminRequest('/categories');
+        if (res?.success) setCategories(res.data);
+        return res;
+    }, [adminRequest]);
+
+    const fetchCoupons = useCallback(async () => {
+        const res = await adminRequest('/coupons');
+        if (res?.success) setCoupons(res.data);
+        return res;
+    }, [adminRequest]);
+
+    const fetchBanners = useCallback(async () => {
+        const res = await adminRequest('/banners');
+        if (res?.success) setBanners(res.data);
+        return res;
+    }, [adminRequest]);
 
     // --- Socket.IO Integration ---
     useEffect(() => {
@@ -419,11 +503,15 @@ export const AdminProvider = ({ children }) => {
         updateOrder,
         addCategory, updateCategory, deleteCategory, addBanner, deleteBanner, updateTicket, updateReview,
         addCoupon, deleteCoupon, adminRequest, filterStats,
-        loading, error, refreshData: fetchData, filterStats
+        loading, error, refreshData: fetchData,
+        fetchSupportTickets, fetchAuditLogs, fetchCustomers, fetchReviews, fetchBlogs, fetchNewsletter, 
+        fetchSettings, fetchInventoryData, fetchCategories, fetchCoupons, fetchBanners
     }), [
         stats, products, categories, orders, reviews, customers, coupons,
         banners, settings, auditLogs, supportTickets, newsletter, blogs,
-        loading, error, fetchData, adminRequest, updateOrder, updateOrderStatus, updateProduct, updateCustomer, filterStats
+        loading, error, fetchData, adminRequest, updateOrder, updateOrderStatus, updateProduct, updateCustomer, filterStats,
+        fetchSupportTickets, fetchAuditLogs, fetchCustomers, fetchReviews, fetchBlogs, fetchNewsletter, 
+        fetchSettings, fetchInventoryData, fetchCategories, fetchCoupons, fetchBanners
     ]);
 
     return (

@@ -128,10 +128,7 @@ function OrdersContent() {
             cell: ({ row }) => (
                 <div className="flex items-center gap-2 relative">
                     <span className="font-bold text-[#0a4019] hover:underline cursor-pointer">
-                        {row.original.orderNumber
-                            ? (row.original.orderNumber.startsWith('#') ? row.original.orderNumber : `#${row.original.orderNumber}`)
-                            : `#${row.original._id.substring(18).toUpperCase()}`
-                        }
+                        {row.original.orderNumber || `#ID-${row.original._id.substring(18).toUpperCase()}`}
                     </span>
                     {row.original.transactionNotes && (
                         <div className="relative group/note cursor-pointer">

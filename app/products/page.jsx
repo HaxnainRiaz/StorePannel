@@ -26,8 +26,14 @@ const quillFormats = [
 ];
 
 export default function ProductsPage() {
-    const { products, addProduct, updateProduct, deleteProduct, categories } = useAdmin();
+    const { products, addProduct, updateProduct, deleteProduct, categories, fetchData, fetchCategories } = useAdmin();
     const { addToast } = useToast();
+
+    useEffect(() => {
+        fetchData();
+        fetchCategories();
+    }, [fetchData, fetchCategories]);
+
     const [isEditing, setIsEditing] = useState(false);
     const [currentProduct, setCurrentProduct] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");

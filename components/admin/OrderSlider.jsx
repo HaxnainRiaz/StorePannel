@@ -155,19 +155,32 @@ export default function OrderSlider() {
     const bookPostEx = async () => {
         setActionLoading(prev => ({ ...prev, postex: true }));
         try {
-            const res = await adminRequest(`/postex/orders/${order._id}/book`, 'POST', bookingParams);
-            if (res?.success || res?.statusCode === '200') {
-                toast.success("Shipment booked successfully");
+            // Build the explicit payload — the backend needs these exact fields for PostEx v3.
+            // Most values are resolved server-side from the DB order, but we send overrides here.
+            const payload = {
+                orderType:  'Normal',
+                weight:     Number(bookingParams.weight) || 0.5,
+                remarks:    bookingParams.remarks || order.transactionNotes || '',
+                // Only send storeAddressCode if the user entered one
+                ...(bookingParams.storeId ? { storeAddressCode: bookingParams.storeId } : {})
+            };
+
+            const res = await adminRequest(`/postex/orders/${order._id}/book`, 'POST', payload);
+
+            if (res?.success) {
+                toast.success(res.message || `Shipment booked! Tracking: ${res.data?.postex?.trackingNumber || ''}`);
                 fetchOrder();
             } else {
-                toast.error(res?.message || "Booking failed (PostEx Error)");
+                // Show the specific error returned by the server (e.g. missing cityName)
+                toast.error(res?.message || 'PostEx booking failed');
             }
         } catch (err) {
-            toast.error("Booking request failed");
+            toast.error(err?.message || 'Booking request failed');
         } finally {
             setActionLoading(prev => ({ ...prev, postex: false }));
         }
     };
+
 
     const handlePrint = () => {
         const printWindow = window.open('', '_blank');
@@ -205,10 +218,7 @@ export default function OrderSlider() {
                     <div class="header">
                         <div class="logo">LUMINELLE</div>
                         <div class="order-info">
-                            <div style="font-size: 20px; font-weight: bold;">Order ${order.orderNumber
-                ? (order.orderNumber.startsWith('#') ? order.orderNumber : `#${order.orderNumber}`)
-                : `#${order._id.substring(18).toUpperCase()}`
-            }</div>
+                            <div style="font-size: 20px; font-weight: bold;">Order ${order.orderNumber || `#ID-${order._id.substring(18).toUpperCase()}`}</div>
                             <div style="color: #666;">${format(new Date(order.createdAt), 'MMM dd, yyyy HH:mm')}</div>
                         </div>
                     </div>
@@ -323,10 +333,7 @@ export default function OrderSlider() {
                         </button>
                         <div>
                             <h1 className="text-xl font-bold text-[#1a1a1a] tracking-tight">
-                                {order ? `Order ${order.orderNumber
-                                    ? (order.orderNumber.startsWith('#') ? order.orderNumber : `#${order.orderNumber}`)
-                                    : `#${order._id.substring(18).toUpperCase()}`
-                                    }` : "Loading..."}
+                                {order ? `Order ${order.orderNumber || `#ID-${order._id.substring(18).toUpperCase()}`}` : "Loading..."}
                             </h1>
                         </div>
                     </div>

@@ -9,6 +9,14 @@ const nextConfig = {
     // Pin root when parent folders also contain package-lock.json (avoids wrong workspace root).
     root: __dirname,
   },
+  optimizePackageImports: ["lucide-react"],
+  experimental: {
+    // Reduce memory usage during development
+    workerThreads: false,
+    cpus: 1,
+  },
+  // Disable source maps in development to save memory if needed, 
+  // but let's stick to the above first.
 };
 
 export default nextConfig;

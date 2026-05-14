@@ -60,8 +60,9 @@ const Sidebar = () => {
             ]
         },
         {
-            title: "SALES & MARKETING",
+            title: "MARKETING & ADS",
             items: [
+                { label: "Facebook & Instagram", href: "/meta", icon: Box }, // Using Box for now, maybe find a better icon
                 { label: "Discounts", href: "/discounts", icon: TicketPercent },
                 { label: "Reviews", href: "/reviews", icon: Star },
                 { label: "Blogs", href: "/blogs", icon: FileText },

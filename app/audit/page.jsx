@@ -1,11 +1,15 @@
 "use client";
 import { useAdmin } from '@/context/AdminContext';
 import AdminTable from '@/components/admin/AdminTable';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { format } from 'date-fns';
 
 export default function AuditLogPage() {
-    const { auditLogs, loading } = useAdmin();
+    const { auditLogs, loading, fetchAuditLogs } = useAdmin();
+
+    useEffect(() => {
+        fetchAuditLogs();
+    }, [fetchAuditLogs]);
 
     const columns = useMemo(() => [
         {
