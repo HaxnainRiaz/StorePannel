@@ -2,12 +2,16 @@
 
 import { useAdmin } from "@/context/AdminContext";
 import { Star, MessageSquare, Check, X, Send, User, ShoppingBag } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ReviewsPage() {
-    const { reviews, updateReview, loading } = useAdmin();
+    const { reviews, updateReview, loading, fetchReviews } = useAdmin();
     const [replyingTo, setReplyingTo] = useState(null);
     const [replyText, setReplyText] = useState("");
+
+    useEffect(() => {
+        fetchReviews();
+    }, [fetchReviews]);
 
     const handleSaveStatus = async (id, status, reply = null) => {
         const updateData = { status };

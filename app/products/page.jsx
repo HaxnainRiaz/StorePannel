@@ -291,10 +291,13 @@ export default function ProductsPage() {
         }
     };
 
-    const filteredProducts = products.filter(p =>
-        p.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (p.category && p.category.title && p.category.title.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const filteredProducts = products.filter(p => {
+        const titleMatch = (p.title || "").toLowerCase().includes(searchTerm.toLowerCase());
+        const categoryMatch = Array.isArray(p.category) 
+            ? p.category.some(c => (typeof c === 'object' ? c.title : "").toLowerCase().includes(searchTerm.toLowerCase()))
+            : (p.category && typeof p.category === 'object' && p.category.title ? p.category.title.toLowerCase().includes(searchTerm.toLowerCase()) : false);
+        return titleMatch || categoryMatch;
+    });
 
     return (
         <div className="space-y-6">

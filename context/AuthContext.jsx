@@ -136,30 +136,11 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         logout,
-        hydrated: true,
-    }), [user, loading, login, logout]);
-
-    // Don't render anything until hydration is complete
-    if (!hydrated) {
-        return (
-            <AuthContext.Provider
-                value={{
-                    user: null,
-                    loading: true,
-                    login,
-                    logout,
-                    hydrated: false,
-                }}
-            >
-                {children}
-            </AuthContext.Provider>
-        );
-    }
+        hydrated,
+    }), [user, loading, login, logout, hydrated]);
 
     return (
-        <AuthContext.Provider
-            value={value}
-        >
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );
@@ -218,26 +199,13 @@ export const ProtectedRoute = ({ children, isLoginPage = false }) => {
         setCanRender(true);
     }, [user, loading, hydrated, isLoginPage, pathname]);
 
-    // Show loader while auth is loading or not hydrated
-    if (!hydrated || (loading && !isLoginPage)) {
-        return (
-            <div className="fixed inset-0 z-[9999] bg-[#FDFCFB] flex items-center justify-center">
-                <div className="w-12 h-12 border-4 border-[#0a4019] border-t-transparent rounded-full animate-spin" />
-            </div>
-        );
+    // On login page, show children (login form) immediately even during hydration/loading
+    if (isLoginPage) {
+        return <>{children}</>;
     }
 
-    // Show login page loader if on login page and loading
-    if (isLoginPage && loading) {
-        return (
-            <div className="fixed inset-0 z-[9999] bg-[#FDFCFB] flex items-center justify-center">
-                <div className="w-12 h-12 border-4 border-[#0a4019] border-t-transparent rounded-full animate-spin" />
-            </div>
-        );
-    }
-
-    // Don't render children until auth check is done
-    if (!canRender) {
+    // For protected pages, show loader while checking auth
+    if (!hydrated || loading || !canRender) {
         return (
             <div className="fixed inset-0 z-[9999] bg-[#FDFCFB] flex items-center justify-center">
                 <div className="w-12 h-12 border-4 border-[#0a4019] border-t-transparent rounded-full animate-spin" />

@@ -52,9 +52,11 @@ const Sidebar = () => {
             title: "POSTEX HUB",
             colorAccent: true,
             items: [
-                { label: "PostEx Bookings", href: "/postex/bookings", icon: Truck },
-                { label: "Bulk Book", href: "/postex/bulk", icon: PackagePlus },
+                { label: "PostEx Settings", href: "/postex/settings", icon: Settings },
+                { label: "All Shipments", href: "/postex/shipments", icon: Truck },
                 { label: "Tracking Monitor", href: "/postex/tracking", icon: MapPin },
+                { label: "Bulk Book", href: "/postex/bulk", icon: PackagePlus },
+                { label: "PostEx Bookings", href: "/postex/bookings", icon: Truck },
                 { label: "Failed Bookings", href: "/postex/failed", icon: AlertTriangle },
                 { label: "Returns Queue", href: "/postex/returns", icon: RotateCcw },
             ]

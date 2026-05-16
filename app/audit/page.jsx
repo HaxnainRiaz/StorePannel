@@ -18,9 +18,9 @@ export default function AuditLogPage() {
             cell: ({ row }) => <span className="text-xs text-neutral-500 font-medium">{format(new Date(row.original.createdAt), 'MMM d, HH:mm:ss')}</span>
         },
         {
-            accessorKey: 'actor_name',
+            accessorKey: 'admin.name',
             header: 'Actor',
-            cell: ({ row }) => <span className="font-bold text-[#0a4019]">{row.original.actor_name || 'System'}</span>
+            cell: ({ row }) => <span className="font-bold text-[#0a4019]">{row.original.admin?.name || 'System'}</span>
         },
         {
             accessorKey: 'action',

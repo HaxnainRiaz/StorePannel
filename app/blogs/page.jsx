@@ -42,7 +42,11 @@ const quillFormats = [
 const fontSizes = ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '30px', '36px', '48px', '60px', '72px'];
 
 export default function BlogsPage() {
-    const { blogs, addBlog, updateBlog, deleteBlog } = useAdmin();
+    const { blogs, addBlog, updateBlog, deleteBlog, fetchBlogs, loading } = useAdmin();
+
+    useEffect(() => {
+        fetchBlogs();
+    }, [fetchBlogs]);
     const { addToast } = useToast();
     const [isEditing, setIsEditing] = useState(false);
     const [currentBlog, setCurrentBlog] = useState(null);
@@ -223,8 +227,8 @@ export default function BlogsPage() {
     };
 
     const filteredBlogs = blogs.filter(b =>
-        b.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.category.toLowerCase().includes(searchTerm.toLowerCase())
+        (b?.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (b?.category || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -477,7 +481,12 @@ export default function BlogsPage() {
                 </div >
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredBlogs.length === 0 ? (
+                    {loading ? (
+                        <div className="col-span-full flex flex-col items-center justify-center py-24">
+                            <div className="w-10 h-10 border-4 border-[#0a4019] border-t-transparent rounded-full animate-spin mb-4" />
+                            <p className="text-[#0a4019] font-heading font-bold animate-pulse">Retrieving Archives...</p>
+                        </div>
+                    ) : filteredBlogs.length === 0 ? (
                         <div className="col-span-full text-center py-24 bg-white rounded-[2.5rem] border border-dashed border-[#F5F3F0]">
                             <Search className="mx-auto text-neutral-300 mb-4" size={48} />
                             <p className="text-[#6B6B6B] font-heading italic">No narratives found in the archives.</p>

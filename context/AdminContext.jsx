@@ -17,6 +17,7 @@ export const AdminProvider = ({ children }) => {
     const [stats, setStats] = useState({});
     const [orders, setOrders] = useState([]);
     const [customers, setCustomers] = useState([]);
+    const [staff, setStaff] = useState([]);
     const [supportTickets, setSupportTickets] = useState([]);
     const [settings, setSettings] = useState(null);
     const [auditLogs, setAuditLogs] = useState([]);
@@ -91,6 +92,7 @@ export const AdminProvider = ({ children }) => {
             // Other data that can be lazy loaded
             const lazyActions = [
                 { key: 'users', action: () => adminRequest('/users'), setter: setCustomers },
+                { key: 'staff', action: () => adminRequest('/users/staff'), setter: setStaff },
                 { key: 'tickets', action: () => adminRequest('/support-tickets'), setter: setSupportTickets },
                 { key: 'settings', action: () => adminRequest('/settings'), setter: setSettings },
                 { key: 'audit', action: () => adminRequest('/audit'), setter: setAuditLogs },
@@ -138,6 +140,12 @@ export const AdminProvider = ({ children }) => {
         return res;
     }, [adminRequest]);
 
+    const fetchStaff = useCallback(async () => {
+        const res = await adminRequest('/users/staff');
+        if (res?.success) setStaff(res.data);
+        return res;
+    }, [adminRequest]);
+
     const fetchReviews = useCallback(async () => {
         const res = await adminRequest('/reviews');
         if (res?.success) setReviews(res.data);
@@ -167,6 +175,8 @@ export const AdminProvider = ({ children }) => {
         if (res?.success) setProducts(res.data);
         return res;
     }, [adminRequest]);
+
+    const fetchProducts = fetchInventoryData;
 
     const fetchCategories = useCallback(async () => {
         const res = await adminRequest('/categories');
@@ -240,12 +250,18 @@ export const AdminProvider = ({ children }) => {
 
             // --- Review Events ---
             socket.on('review:new', (newReview) => {
-                setReviews(prev => [newReview, ...prev]);
+                setReviews(prev => {
+                    if (prev.find(r => r._id === newReview._id)) return prev;
+                    return [newReview, ...prev];
+                });
             });
 
             // --- Support Ticket Events ---
             socket.on('support:ticket:new', (newTicket) => {
-                setSupportTickets(prev => [newTicket, ...prev]);
+                setSupportTickets(prev => {
+                    if (prev.find(t => t._id === newTicket._id)) return prev;
+                    return [newTicket, ...prev];
+                });
             });
             socket.on('support:ticket:update', (updatedTicket) => {
                 setSupportTickets(prev => prev.map(t => t._id === updatedTicket._id ? updatedTicket : t));
@@ -255,7 +271,12 @@ export const AdminProvider = ({ children }) => {
             });
 
             // --- Blog Events ---
-            socket.on('blog:create', (newBlog) => setBlogs(prev => [newBlog, ...prev]));
+            socket.on('blog:create', (newBlog) => {
+                setBlogs(prev => {
+                    if (prev.find(b => b._id === newBlog._id)) return prev;
+                    return [newBlog, ...prev];
+                });
+            });
             socket.on('blog:update', (updatedBlog) => setBlogs(prev => prev.map(b => b._id === updatedBlog._id ? updatedBlog : b)));
             socket.on('blog:delete', ({ id }) => setBlogs(prev => prev.filter(b => b._id !== id)));
 
@@ -273,12 +294,22 @@ export const AdminProvider = ({ children }) => {
             });
 
             // --- Coupon Events ---
-            socket.on('coupon:new', (c) => setCoupons(prev => [c, ...prev]));
+            socket.on('coupon:new', (c) => {
+                setCoupons(prev => {
+                    if (prev.find(coupon => coupon._id === c._id)) return prev;
+                    return [c, ...prev];
+                });
+            });
             socket.on('coupon:update', (c) => setCoupons(prev => prev.map(prevC => prevC._id === c._id ? c : prevC)));
             socket.on('coupon:delete', ({ id }) => setCoupons(prev => prev.filter(c => c._id !== id)));
 
             // --- Banner Events ---
-            socket.on('banner:new', (b) => setBanners(prev => [b, ...prev]));
+            socket.on('banner:new', (b) => {
+                setBanners(prev => {
+                    if (prev.find(banner => banner._id === b._id)) return prev;
+                    return [b, ...prev];
+                });
+            });
             socket.on('banner:update', (b) => setBanners(prev => prev.map(prevB => prevB._id === b._id ? b : prevB)));
             socket.on('banner:delete', ({ id }) => setBanners(prev => prev.filter(b => b._id !== id)));
 
@@ -336,6 +367,28 @@ export const AdminProvider = ({ children }) => {
         const res = await adminRequest(`/users/${id}`, 'PUT', updatedData);
         if (res?.success) setCustomers(prev => prev.map(c => c._id === id ? res.data : c));
         else setCustomers(prevCustomers);
+        return res;
+    };
+
+    const updateStaff = async (id, updatedData) => {
+        const prevStaff = [...staff];
+        setStaff(prev => prev.map(s => s._id === id ? { ...s, ...updatedData } : s));
+        const res = await adminRequest(`/users/${id}`, 'PUT', updatedData);
+        if (res?.success) setStaff(prev => prev.map(s => s._id === id ? res.data : s));
+        else setStaff(prevStaff);
+        return res;
+    };
+
+    const deleteUser = async (id) => {
+        const prevCustomers = [...customers];
+        const prevStaff = [...staff];
+        setCustomers(prev => prev.filter(c => c._id !== id));
+        setStaff(prev => prev.filter(s => s._id !== id));
+        const res = await adminRequest(`/users/${id}`, 'DELETE');
+        if (!res?.success) {
+            setCustomers(prevCustomers);
+            setStaff(prevStaff);
+        }
         return res;
     };
 
@@ -494,23 +547,25 @@ export const AdminProvider = ({ children }) => {
     }, [adminRequest]);
 
     const contextValue = React.useMemo(() => ({
-        stats, products, categories, orders, reviews, customers, coupons,
+        stats, products, categories, orders, reviews, customers, staff, coupons,
         banners, settings, auditLogs, supportTickets, newsletter, blogs,
         addProduct, updateProduct, deleteProduct,
         addBlog, updateBlog, deleteBlog,
-        updateCustomer,
+        updateCustomer, updateStaff, deleteUser,
         updateOrderStatus, updateSettings, replyToTicket, updateTicketStatus,
         updateOrder,
         addCategory, updateCategory, deleteCategory, addBanner, deleteBanner, updateTicket, updateReview,
         addCoupon, deleteCoupon, adminRequest, filterStats,
+        fetchProducts,
         loading, error, refreshData: fetchData,
-        fetchSupportTickets, fetchAuditLogs, fetchCustomers, fetchReviews, fetchBlogs, fetchNewsletter, 
+        fetchSupportTickets, fetchAuditLogs, fetchCustomers, fetchStaff, fetchReviews, fetchBlogs, fetchNewsletter, 
         fetchSettings, fetchInventoryData, fetchCategories, fetchCoupons, fetchBanners
     }), [
-        stats, products, categories, orders, reviews, customers, coupons,
+        stats, products, categories, orders, reviews, customers, staff, coupons,
         banners, settings, auditLogs, supportTickets, newsletter, blogs,
-        loading, error, fetchData, adminRequest, updateOrder, updateOrderStatus, updateProduct, updateCustomer, filterStats,
-        fetchSupportTickets, fetchAuditLogs, fetchCustomers, fetchReviews, fetchBlogs, fetchNewsletter, 
+        loading, error, fetchData, adminRequest, updateOrder, updateOrderStatus, updateProduct, updateCustomer, updateStaff, deleteUser, filterStats,
+        fetchProducts,
+        fetchSupportTickets, fetchAuditLogs, fetchCustomers, fetchStaff, fetchReviews, fetchBlogs, fetchNewsletter, 
         fetchSettings, fetchInventoryData, fetchCategories, fetchCoupons, fetchBanners
     ]);
 

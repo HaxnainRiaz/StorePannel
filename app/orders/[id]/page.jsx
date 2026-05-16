@@ -14,6 +14,7 @@ import { Button } from "@/components/ui";
 import toast from "react-hot-toast";
 import useOrderStore from "@/store/useOrderStore";
 import { useOrderDraft } from "@/hooks/useOrderDraft";
+import ShipWithPostExModal from "@/components/postex/ShipWithPostExModal";
 
 // --- Components ---
 
@@ -71,11 +72,7 @@ export default function OrderDetailPage() {
     const [editedFields, setEditedFields] = useState({});
     const [newNote, setNewNote] = useState("");
     const [showCancelModal, setShowCancelModal] = useState(false);
-    const [bookingParams, setBookingParams] = useState({
-        weight: 0.5,
-        storeId: "PANDAE_0",
-        remarks: ""
-    });
+    const [showShipModal, setShowShipModal] = useState(false);
 
     // Fetch Order
     const fetchOrder = useCallback(async () => {
@@ -132,22 +129,7 @@ export default function OrderDetailPage() {
         await performAction('save_all', `/orders/${order._id}`, 'PATCH', editedFields);
     }, [order?._id, editedFields, performAction]);
 
-    const bookPostEx = async () => {
-        setActionLoading(prev => ({ ...prev, postex: true }));
-        try {
-            const res = await adminRequest(`/postex/orders/${order._id}/book`, 'POST', bookingParams);
-            if (res?.success || res?.statusCode === '200') {
-                toast.success("Shipment booked successfully");
-                fetchOrder();
-            } else {
-                toast.error(res?.message || "Booking failed (PostEx Error)");
-            }
-        } catch (err) {
-            toast.error("Booking request failed");
-        } finally {
-            setActionLoading(prev => ({ ...prev, postex: false }));
-        }
-    };
+    // bookPostEx replaced by ShipWithPostExModal
 
     const handlePrint = () => {
         const printWindow = window.open('', '_blank');
@@ -603,100 +585,52 @@ export default function OrderDetailPage() {
                                         {order.isPostExBooked ? 'Shipment Booked' : 'Ready to Book with PostEx'}
                                     </h2>
                                     <p className="text-[10px] font-bold text-[#6b7c6b] uppercase mt-1 tracking-widest opacity-60">
-                                        Auto-filled from order details
+                                        Powered by PostEx COD API
                                     </p>
                                 </div>
                             </div>
                         </div>
-
-                        <div className="p-6 space-y-6">
-                            {order.isPostExBooked ? (
-                                <div className="space-y-4">
-                                    <div className="bg-white p-4 rounded-xl border border-[#d4edda] space-y-4">
-                                        <div>
-                                            <p className="text-[10px] font-bold text-[#6b7c6b] uppercase tracking-widest mb-1">Tracking Number</p>
-                                            <p className="text-xl font-mono font-bold text-[#155724]">{order.postex?.trackingNumber}</p>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#d4edda]">
-                                            <div>
-                                                <p className="text-[10px] font-bold text-[#6b7c6b] uppercase tracking-widest mb-1">CN Number</p>
-                                                <p className="text-sm font-bold text-[#1a1a1a]">{order.postex?.orderRefNumber || "N/A"}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] font-bold text-[#6b7c6b] uppercase tracking-widest mb-1">Booked On</p>
-                                                <p className="text-sm font-bold text-[#1a1a1a]">{order.postex?.bookedAt ? format(new Date(order.postex.bookedAt), 'MMM dd, yyyy') : 'N/A'}</p>
-                                            </div>
-                                        </div>
+                        <div className="p-6 space-y-4">
+                            {order.isPostExBooked && (
+                                <div className="bg-white p-4 rounded-xl border border-[#d4edda] space-y-3">
+                                    <div>
+                                        <p className="text-[10px] font-bold text-[#6b7c6b] uppercase tracking-widest mb-1">Tracking Number</p>
+                                        <p className="text-xl font-mono font-bold text-[#155724]">{order.postex?.trackingNumber}</p>
                                     </div>
-                                    <Button
-                                        onClick={bookPostEx}
-                                        loading={actionLoading.postex}
-                                        variant="outline"
-                                        className="w-full h-12 border-[#1a4a1a] text-[#1a4a1a] text-xs font-bold tracking-widest uppercase rounded-[8px]"
-                                    >
-                                        Re-book Shipment
-                                    </Button>
-                                    <a
-                                        href={`https://postex.pk/tracking?trackingId=${order.postex?.trackingNumber}`}
-                                        target="_blank"
-                                        className="flex items-center justify-center gap-2 text-[10px] font-bold text-[#1a4a1a] uppercase tracking-widest hover:underline"
-                                    >
-                                        Open Tracking Page <ExternalLink size={12} />
+                                    <a href={`https://postex.pk/tracking?trackingId=${order.postex?.trackingNumber}`} target="_blank"
+                                        className="flex items-center gap-1 text-[10px] font-bold text-[#1a4a1a] uppercase tracking-widest hover:underline">
+                                        Open Tracking Page <ExternalLink size={11}/>
                                     </a>
                                 </div>
-                            ) : (
-                                <>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="text-[10px] font-bold text-[#6b7c6b] uppercase tracking-widest mb-2 block">Weight (KG)</label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                className="w-full bg-[#f7fbf7] border border-[#e8f0e8] rounded-lg p-3 text-sm font-bold focus:outline-none focus:border-[#1a4a1a]"
-                                                value={bookingParams.weight}
-                                                onChange={e => setBookingParams(prev => ({ ...prev, weight: e.target.value }))}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-bold text-[#6b7c6b] uppercase tracking-widest mb-2 block">Store ID</label>
-                                            <input
-                                                type="text"
-                                                className="w-full bg-[#f7fbf7] border border-[#e8f0e8] rounded-lg p-3 text-sm font-bold focus:outline-none focus:border-[#1a4a1a]"
-                                                value={bookingParams.storeId}
-                                                onChange={e => setBookingParams(prev => ({ ...prev, storeId: e.target.value }))}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-bold text-[#6b7c6b] uppercase tracking-widest mb-2 block">Special Instructions</label>
-                                            <textarea
-                                                className="w-full bg-[#f7fbf7] border border-[#e8f0e8] rounded-lg p-3 text-sm focus:outline-none focus:border-[#1a4a1a] h-24"
-                                                placeholder="Add delivery notes..."
-                                                value={bookingParams.remarks}
-                                                onChange={e => setBookingParams(prev => ({ ...prev, remarks: e.target.value }))}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <Button
-                                        onClick={bookPostEx}
-                                        loading={actionLoading.postex}
-                                        disabled={order.orderStatus === 'cancelled'}
-                                        className="w-full h-14 bg-[#1a4a1a] text-white text-xs font-bold tracking-widest uppercase rounded-[8px] shadow-lg shadow-[#1a4a1a]/20 hover:bg-[#051712] transition-all"
-                                    >
-                                        {actionLoading.postex ? 'Booking...' : 'BOOK SHIPMENT NOW'}
-                                    </Button>
-
-                                    {order.orderStatus === 'cancelled' && (
-                                        <div className="bg-[#f8d7da] text-[#721c24] text-[10px] font-bold p-3 rounded-lg flex items-center gap-2 uppercase tracking-widest">
-                                            <XCircle size={14} /> Shipment cannot be booked for cancelled orders
-                                        </div>
-                                    )}
-                                </>
+                            )}
+                            <Button
+                                onClick={() => setShowShipModal(true)}
+                                disabled={order.orderStatus === 'cancelled'}
+                                className={`w-full h-12 text-xs font-bold tracking-widest uppercase rounded-[8px] transition-all ${
+                                    order.isPostExBooked
+                                        ? 'border border-[#1a4a1a] text-[#1a4a1a] bg-transparent hover:bg-[#1a4a1a] hover:text-white'
+                                        : 'bg-[#1a4a1a] text-white shadow-lg shadow-[#1a4a1a]/20 hover:bg-[#051712]'
+                                }`}
+                            >
+                                <Truck size={14} className="mr-2 inline"/>
+                                {order.isPostExBooked ? 'Re-book / Update Shipment' : 'Ship with PostEx'}
+                            </Button>
+                            {order.orderStatus === 'cancelled' && (
+                                <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest text-center">Cannot ship a cancelled order</p>
                             )}
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Ship with PostEx Modal */}
+            {showShipModal && (
+                <ShipWithPostExModal
+                    order={order}
+                    onClose={() => setShowShipModal(false)}
+                    onSuccess={() => fetchOrder()}
+                />
+            )}
 
             {/* 4. STICKY BOTTOM ACTION BAR */}
             <div className="fixed bottom-0 left-0 md:left-64 right-0 z-40 bg-[#f7fbf7] border-t-[1.5px] border-[#e8f0e8] px-8 py-4 flex items-center justify-between shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">

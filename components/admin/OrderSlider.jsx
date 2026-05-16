@@ -14,6 +14,7 @@ import { Button } from "@/components/ui";
 import toast from "react-hot-toast";
 import useOrderStore from "@/store/useOrderStore";
 import { useOrderDraft } from "@/hooks/useOrderDraft";
+import ShipWithPostExModal from "@/components/postex/ShipWithPostExModal";
 
 // --- Sub-components ---
 
@@ -75,11 +76,7 @@ export default function OrderSlider() {
     const [newNote, setNewNote] = useState("");
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [showNotePopup, setShowNotePopup] = useState(false);
-    const [bookingParams, setBookingParams] = useState({
-        weight: 0.5,
-        storeId: "PANDAE_0",
-        remarks: ""
-    });
+    const [showShipModal, setShowShipModal] = useState(false);
 
     const orderStatuses = [
         'pending', 'processing', 'in progress', 'confirmed', 'on hold', 'unfulfilled', 'shipped', 'delivered', 'cancelled', 'returned'
@@ -152,34 +149,7 @@ export default function OrderSlider() {
         await performAction('save_field', `/orders/${order._id}`, 'PATCH', payload);
     }, [order?._id, performAction]);
 
-    const bookPostEx = async () => {
-        setActionLoading(prev => ({ ...prev, postex: true }));
-        try {
-            // Build the explicit payload — the backend needs these exact fields for PostEx v3.
-            // Most values are resolved server-side from the DB order, but we send overrides here.
-            const payload = {
-                orderType:  'Normal',
-                weight:     Number(bookingParams.weight) || 0.5,
-                remarks:    bookingParams.remarks || order.transactionNotes || '',
-                // Only send storeAddressCode if the user entered one
-                ...(bookingParams.storeId ? { storeAddressCode: bookingParams.storeId } : {})
-            };
-
-            const res = await adminRequest(`/postex/orders/${order._id}/book`, 'POST', payload);
-
-            if (res?.success) {
-                toast.success(res.message || `Shipment booked! Tracking: ${res.data?.postex?.trackingNumber || ''}`);
-                fetchOrder();
-            } else {
-                // Show the specific error returned by the server (e.g. missing cityName)
-                toast.error(res?.message || 'PostEx booking failed');
-            }
-        } catch (err) {
-            toast.error(err?.message || 'Booking request failed');
-        } finally {
-            setActionLoading(prev => ({ ...prev, postex: false }));
-        }
-    };
+    // bookPostEx replaced by ShipWithPostExModal
 
 
     const handlePrint = () => {
@@ -656,25 +626,36 @@ export default function OrderSlider() {
                                         <h2 className={`font-bold text-[11px] uppercase tracking-widest ${order.isPostExBooked ? 'text-[#155724]' : 'text-[#1a1a1a]'}`}>PostEx Integration</h2>
                                     </div>
                                     <div className="p-4">
-                                        {order.isPostExBooked ? (
-                                            <div className="bg-white p-4 rounded-xl border border-[#d4edda] flex justify-between items-center">
+                                        {order.isPostExBooked && (
+                                            <div className="bg-white p-4 rounded-xl border border-[#d4edda] flex justify-between items-center mb-4">
                                                 <div>
                                                     <p className="text-[9px] font-bold text-[#6b7c6b] uppercase mb-1">Tracking Number</p>
                                                     <p className="text-lg font-mono font-bold text-[#155724]">{order.postex?.trackingNumber}</p>
                                                 </div>
                                                 <a href={`https://postex.pk/tracking?trackingId=${order.postex?.trackingNumber}`} target="_blank" className="p-2.5 bg-emerald-50 rounded-full text-[#155724] hover:bg-emerald-100 transition-all"><ExternalLink size={18} /></a>
                                             </div>
-                                        ) : (
-                                            <div className="space-y-4">
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div><label className="text-[9px] font-bold text-[#6b7c6b] uppercase mb-1.5 block">Weight (KG)</label><input type="number" step="0.1" className="w-full bg-[#f7fbf7] border border-[#e8f0e8] rounded-lg p-2.5 text-xs font-bold" value={bookingParams.weight} onChange={e => setBookingParams(prev => ({ ...prev, weight: e.target.value }))} /></div>
-                                                    <div><label className="text-[9px] font-bold text-[#6b7c6b] uppercase mb-1.5 block">Store ID</label><input type="text" className="w-full bg-[#f7fbf7] border border-[#e8f0e8] rounded-lg p-2.5 text-xs font-bold" value={bookingParams.storeId} onChange={e => setBookingParams(prev => ({ ...prev, storeId: e.target.value }))} /></div>
-                                                </div>
-                                                <Button onClick={bookPostEx} loading={actionLoading.postex} disabled={['cancelled', 'returned'].includes(order.orderStatus)} className="w-full h-12 bg-[#1a4a1a] text-white text-[10px] font-bold tracking-widest uppercase rounded-[8px] shadow-lg shadow-[#1a4a1a]/20">Book Shipment Now</Button>
-                                            </div>
                                         )}
+                                        <Button
+                                            onClick={() => setShowShipModal(true)}
+                                            disabled={order.orderStatus === 'cancelled'}
+                                            className={`w-full h-12 text-[10px] font-bold tracking-widest uppercase rounded-[8px] shadow-lg transition-all ${
+                                                order.isPostExBooked
+                                                    ? 'bg-white border border-[#1a4a1a] text-[#1a4a1a] hover:bg-[#1a4a1a] hover:text-white'
+                                                    : 'bg-[#1a4a1a] text-white shadow-[#1a4a1a]/20 hover:bg-[#051712]'
+                                            }`}
+                                        >
+                                            {order.isPostExBooked ? 'Re-book Shipment' : 'Book Shipment Now'}
+                                        </Button>
                                     </div>
                                 </div>
+
+                                {showShipModal && (
+                                    <ShipWithPostExModal
+                                        order={order}
+                                        onClose={() => setShowShipModal(false)}
+                                        onSuccess={() => fetchOrder()}
+                                    />
+                                )}
                             </div>
                         </>
                     )}

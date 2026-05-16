@@ -10,12 +10,15 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
+        setIsLoading(true);
         const result = await login(email, password);
+        setIsLoading(false);
         if (!result.success) {
             setError(result.message);
         }
@@ -76,8 +79,9 @@ export default function LoginPage() {
                         <Button
                             type="submit"
                             className="w-full py-5 rounded-2xl shadow-xl shadow-[#0a4019]/20 mt-4"
+                            disabled={isLoading}
                         >
-                            Sign Into Dashboard
+                            {isLoading ? "Authenticating..." : "Sign Into Dashboard"}
                         </Button>
                     </form>
 

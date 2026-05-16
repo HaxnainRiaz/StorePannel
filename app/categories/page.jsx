@@ -1,13 +1,17 @@
 "use client";
 
 import { useAdmin } from "@/context/AdminContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SearchBar, Button, Input } from "@/components/ui";
 import { Plus, Edit2, Trash2, Tag, Layers, X } from "lucide-react";
 
 export default function CategoriesPage() {
-    const { categories, addCategory, updateCategory, deleteCategory, loading } = useAdmin();
+    const { categories, addCategory, updateCategory, deleteCategory, loading, fetchCategories } = useAdmin();
     const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
+        fetchCategories();
+    }, [fetchCategories]);
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);

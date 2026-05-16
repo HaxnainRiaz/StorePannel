@@ -10,7 +10,11 @@ import AdminTable from "@/components/admin/AdminTable";
 import { resolveImageUrl } from "@/utils/upload";
 
 export default function InventoryPage() {
-    const { products, updateProduct, deleteProduct, loading } = useAdmin();
+    const { products, updateProduct, deleteProduct, loading, fetchProducts } = useAdmin();
+
+    useEffect(() => {
+        fetchProducts();
+    }, [fetchProducts]);
     const { addToast } = useToast();
     const [searchTerm, setSearchTerm] = useState("");
     const [localStocks, setLocalStocks] = useState({}); // { productId: stockValue }
