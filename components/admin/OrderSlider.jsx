@@ -638,11 +638,10 @@ export default function OrderSlider() {
                                         <Button
                                             onClick={() => setShowShipModal(true)}
                                             disabled={order.orderStatus === 'cancelled'}
-                                            className={`w-full h-12 text-[10px] font-bold tracking-widest uppercase rounded-[8px] shadow-lg transition-all ${
-                                                order.isPostExBooked
-                                                    ? 'bg-white border border-[#1a4a1a] text-[#1a4a1a] hover:bg-[#1a4a1a] hover:text-white'
+                                            className={`w-full h-12 text-[10px] font-bold tracking-widest uppercase rounded-[8px] shadow-lg transition-all ${order.isPostExBooked
+                                                    ? 'bg-[#0a4019] border border-[#1a4a1a] text-[#1a4a1a] hover:bg-[#1a4a1a] hover:text-white'
                                                     : 'bg-[#1a4a1a] text-white shadow-[#1a4a1a]/20 hover:bg-[#051712]'
-                                            }`}
+                                                }`}
                                         >
                                             {order.isPostExBooked ? 'Re-book Shipment' : 'Book Shipment Now'}
                                         </Button>

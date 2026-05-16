@@ -13,6 +13,7 @@ import AdminTable from "@/components/admin/AdminTable";
 import { formatDistanceToNow, format } from "date-fns";
 import useOrderStore from "@/store/useOrderStore";
 import toast from "react-hot-toast";
+import ShipWithPostExModal from "@/components/postex/ShipWithPostExModal";
 
 const StatusBadge = ({ text, type }) => {
     let colorClass = "bg-gray-100 text-gray-700 border-gray-200";
@@ -50,6 +51,7 @@ function OrdersContent() {
     const [rowSelection, setRowSelection] = useState({});
     const [activeTab, setActiveTab] = useState("All");
     const [searchTerm, setSearchTerm] = useState("");
+    const [selectedOrderForShip, setSelectedOrderForShip] = useState(null);
 
     // Support /orders?id=... as full page
     useEffect(() => {
@@ -206,22 +208,37 @@ function OrdersContent() {
             id: "tags",
             header: "Tags",
             cell: ({ row }) => row.original.paymentMethod === 'COD' ? <span className="px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded text-[10px] font-bold">COD</span> : null
+        },
+        {
+            id: "book",
+            header: "Shipping",
+            cell: ({ row }) => {
+                const order = row.original;
+                if (order.isPostExBooked) {
+                    return (
+                        <div className="flex items-center gap-1.5 text-emerald-600 font-bold text-[10px] uppercase tracking-wider">
+                            <CheckCircle size={14} /> Booked
+                        </div>
+                    );
+                }
+                return (
+                    <Button 
+                        size="sm" 
+                        onClick={(e) => { e.stopPropagation(); setSelectedOrderForShip(order); }}
+                        className="h-7 px-3 bg-[#0a4019] text-white text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-[#051712]"
+                    >
+                        <Truck size={12} className="mr-1" /> Book
+                    </Button>
+                );
+            }
         }
     ], []);
 
     const selectedOrderIds = Object.keys(rowSelection).map(idx => filteredOrders[parseInt(idx)]?._id).filter(Boolean);
 
-    const handleBulkBook = async () => {
-        try {
-            const res = await adminRequest('/postex/bulk-book', 'POST', { orderIds: selectedOrderIds });
-            if (res?.success) {
-                toast.success(`Successfully booked ${res.count} orders`);
-                setRowSelection({});
-                refreshData();
-            }
-        } catch (error) {
-            toast.error('Bulk booking failed');
-        }
+    const handleBulkBook = () => {
+        if (selectedOrderIds.length === 0) return;
+        router.push(`/postex/bulk-prep?ids=${selectedOrderIds.join(',')}`);
     };
 
     const handleBulkCancel = async () => {
@@ -385,6 +402,14 @@ function OrdersContent() {
                         </div>
                     </div>
                 </div>
+            )}
+            {/* Ship Modal */}
+            {selectedOrderForShip && (
+                <ShipWithPostExModal 
+                    order={selectedOrderForShip} 
+                    onClose={() => setSelectedOrderForShip(null)} 
+                    onSuccess={() => refreshData()} 
+                />
             )}
         </div>
     );
