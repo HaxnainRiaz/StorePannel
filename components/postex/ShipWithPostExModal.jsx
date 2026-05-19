@@ -43,15 +43,15 @@ export default function ShipWithPostExModal({ order, onClose, onSuccess }) {
             if (order) {
                 setForm(prev => ({
                     ...prev,
-                    customerName:    order.customerName || order.shippingAddress?.fullName || '',
-                    customerPhone:   order.customerPhone || order.shippingAddress?.phone || '',
-                    cityName:        order.cityName || order.shippingAddress?.city || '',
+                    customerName: order.customerName || order.shippingAddress?.fullName || '',
+                    customerPhone: order.customerPhone || order.shippingAddress?.phone || '',
+                    cityName: order.cityName || order.shippingAddress?.city || '',
                     deliveryAddress: order.deliveryAddress || [order.shippingAddress?.street, order.shippingAddress?.city].filter(Boolean).join(', '),
-                    invoicePayment:  order.paymentStatus === 'paid' ? 0 : (order.totalAmount || ''),
-                    items:           (order.items || []).reduce((acc, i) => acc + i.quantity, 0),
+                    invoicePayment: order.paymentStatus === 'paid' ? 0 : (order.totalAmount || ''),
+                    items: (order.items || []).reduce((acc, i) => acc + i.quantity, 0),
                     transactionNotes: order.transactionNotes || '',
                     pickupAddressCode: statusRes?.data?.defaultPickupAddressCode || (addrRes?.data?.find(a => a.addressType === 'Pickup Address')?.addressCode) || '',
-                    storeAddressCode:  statusRes?.data?.defaultStoreAddressCode  || ''
+                    storeAddressCode: statusRes?.data?.defaultStoreAddressCode || ''
                 }));
             }
             setLoading(false);
@@ -89,7 +89,7 @@ export default function ShipWithPostExModal({ order, onClose, onSuccess }) {
                 <div className="flex items-center justify-between p-6 border-b border-[#F5F3F0]">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-[#0a4019] flex items-center justify-center">
-                            <Truck size={18} className="text-white"/>
+                            <Truck size={18} className="text-white" />
                         </div>
                         <div>
                             <h2 className="font-bold text-[#0a4019] uppercase tracking-widest text-sm">Ship with PostEx</h2>
@@ -97,15 +97,15 @@ export default function ShipWithPostExModal({ order, onClose, onSuccess }) {
                         </div>
                     </div>
                     <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-neutral-100 flex items-center justify-center">
-                        <X size={16}/>
+                        <X size={16} />
                     </button>
                 </div>
 
                 {loading ? (
-                    <div className="flex justify-center items-center py-16"><Loader2 className="animate-spin text-[#0a4019]" size={28}/></div>
+                    <div className="flex justify-center items-center py-16"><Loader2 className="animate-spin text-[#0a4019]" size={28} /></div>
                 ) : !status?.isConnected ? (
                     <div className="p-8 text-center">
-                        <AlertCircle size={36} className="mx-auto mb-3 text-orange-400"/>
+                        <AlertCircle size={36} className="mx-auto mb-3 text-orange-400" />
                         <p className="font-bold text-sm text-neutral-700 mb-1">PostEx Not Connected</p>
                         <p className="text-xs text-neutral-500">Please connect your PostEx account in <strong>PostEx → Settings</strong> first.</p>
                     </div>
@@ -113,12 +113,12 @@ export default function ShipWithPostExModal({ order, onClose, onSuccess }) {
                     <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                         {order?.isPostExBooked && (
                             <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex gap-2 items-start">
-                                <AlertCircle size={14} className="text-amber-600 mt-0.5 flex-shrink-0"/>
+                                <AlertCircle size={14} className="text-amber-600 mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p className="text-xs font-bold text-amber-700">Already booked on PostEx</p>
                                     <p className="text-xs text-amber-600">Tracking: {order.postex?.trackingNumber}</p>
                                     <label className="flex items-center gap-2 mt-2 cursor-pointer">
-                                        <input type="checkbox" checked={forceRebook} onChange={e => setForceRebook(e.target.checked)} className="rounded"/>
+                                        <input type="checkbox" checked={forceRebook} onChange={e => setForceRebook(e.target.checked)} className="rounded" />
                                         <span className="text-xs text-amber-700 font-medium">Create another shipment anyway</span>
                                     </label>
                                 </div>
@@ -127,10 +127,10 @@ export default function ShipWithPostExModal({ order, onClose, onSuccess }) {
 
                         <div className="grid grid-cols-2 gap-4">
                             <Field label="Customer Name" required>
-                                <input value={form.customerName} onChange={e => set('customerName', e.target.value)} required className={inputCls}/>
+                                <input value={form.customerName} onChange={e => set('customerName', e.target.value)} required className={inputCls} />
                             </Field>
                             <Field label="Phone" required>
-                                <input value={form.customerPhone} onChange={e => set('customerPhone', e.target.value)} placeholder="03XXXXXXXXX" required className={inputCls}/>
+                                <input value={form.customerPhone} onChange={e => set('customerPhone', e.target.value)} placeholder="03XXXXXXXXX" required className={inputCls} />
                             </Field>
                         </div>
 
@@ -142,15 +142,15 @@ export default function ShipWithPostExModal({ order, onClose, onSuccess }) {
                         </Field>
 
                         <Field label="Delivery Address" required>
-                            <textarea value={form.deliveryAddress} onChange={e => set('deliveryAddress', e.target.value)} rows={2} required className={inputCls}/>
+                            <textarea value={form.deliveryAddress} onChange={e => set('deliveryAddress', e.target.value)} rows={2} required className={inputCls} />
                         </Field>
 
                         <div className="grid grid-cols-2 gap-4">
                             <Field label="COD Amount (Rs.)" required>
-                                <input type="number" value={form.invoicePayment} onChange={e => set('invoicePayment', e.target.value)} required min={0} className={inputCls}/>
+                                <input type="number" value={form.invoicePayment} onChange={e => set('invoicePayment', e.target.value)} required min={0} className={inputCls} />
                             </Field>
                             <Field label="Items Count" required>
-                                <input type="number" value={form.items} onChange={e => set('items', e.target.value)} required min={1} className={inputCls}/>
+                                <input type="number" value={form.items} onChange={e => set('items', e.target.value)} required min={1} className={inputCls} />
                             </Field>
                         </div>
 
@@ -163,7 +163,7 @@ export default function ShipWithPostExModal({ order, onClose, onSuccess }) {
                                 </select>
                             </Field>
                             <Field label="Invoice Division">
-                                <input type="number" value={form.invoiceDivision} onChange={e => set('invoiceDivision', e.target.value)} min={1} className={inputCls}/>
+                                <input type="number" value={form.invoiceDivision} onChange={e => set('invoiceDivision', e.target.value)} min={1} className={inputCls} />
                             </Field>
                         </div>
 
@@ -180,13 +180,13 @@ export default function ShipWithPostExModal({ order, onClose, onSuccess }) {
                         </Field>
 
                         <Field label="Notes / Remarks">
-                            <input value={form.transactionNotes} onChange={e => set('transactionNotes', e.target.value)} className={inputCls}/>
+                            <input value={form.transactionNotes} onChange={e => set('transactionNotes', e.target.value)} className={inputCls} />
                         </Field>
 
                         <div className="pt-2 flex gap-3">
                             <button type="submit" disabled={submitting || (order?.isPostExBooked && !forceRebook)}
                                 className="flex-1 flex items-center justify-center gap-2 bg-[#0a4019] text-white rounded-xl py-3 text-sm font-bold hover:bg-[#0a4019]/90 disabled:opacity-50 transition-all">
-                                {submitting ? <Loader2 size={16} className="animate-spin"/> : <Truck size={16}/>}
+                                {submitting ? <Loader2 size={16} className="animate-spin" /> : <Truck size={16} />}
                                 {submitting ? 'Booking…' : 'Book Shipment'}
                             </button>
                             <button type="button" onClick={onClose} className="border border-neutral-200 rounded-xl px-5 py-3 text-sm font-bold text-neutral-600 hover:bg-neutral-50">
