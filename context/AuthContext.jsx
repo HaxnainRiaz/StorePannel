@@ -5,8 +5,10 @@ import { usePathname } from 'next/navigation';
 
 const AuthContext = createContext(null);
 
-const API_URL =
-    (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000') + '/api';
+let API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000') + '/api';
+if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && API_URL.includes('localhost')) {
+    API_URL = 'https://store-backend-neon.vercel.app/api';
+}
 
 /**
  * AuthProvider - Manages authentication state

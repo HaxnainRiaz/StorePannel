@@ -3,7 +3,10 @@ export const uploadImage = async (file) => {
         const formData = new FormData();
         formData.append('image', file);
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && apiUrl.includes('localhost')) {
+            apiUrl = 'https://store-backend-neon.vercel.app';
+        }
         // Clean up base URL for the upload request
         const baseApiUrl = apiUrl.replace(/\/$/, '').replace(/\/api$/, '');
 
@@ -70,6 +73,9 @@ export function resolveImageUrl(src, placeholder = "https://images.unsplash.com/
 
     // 2. Handle relative paths from backend
     let baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && baseUrl.includes('localhost')) {
+        baseUrl = 'https://store-backend-neon.vercel.app';
+    }
     baseUrl = baseUrl.replace(/\/$/, '').replace(/\/api$/, '');
 
     // Clean up the path: remove leading slash and 'uploads/' prefix if present
