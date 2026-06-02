@@ -79,6 +79,7 @@ export default function MetaIntegrationPage() {
         { id: "capi", label: "Conversions API", icon: Zap },
         { id: "events", label: "Events", icon: Activity },
         { id: "logs", label: "Logs", icon: History },
+        { id: "diagnostics", label: "Diagnostics", icon: ShieldCheck },
         { id: "settings", label: "Settings", icon: Settings },
     ];
 
@@ -152,6 +153,7 @@ export default function MetaIntegrationPage() {
                 {activeTab === "capi" && <MetaCapiManagement config={config} refresh={fetchConfig} />}
                 {activeTab === "events" && <MetaEventManager config={config} refresh={fetchConfig} />}
                 {activeTab === "logs" && <MetaEventLogs />}
+                {activeTab === "diagnostics" && <MetaDiagnostics config={config} />}
             </div>
         </div>
     );

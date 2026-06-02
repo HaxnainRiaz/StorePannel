@@ -98,7 +98,7 @@ export default function ReviewsPage() {
                                             <textarea
                                                 value={replyText}
                                                 onChange={(e) => setReplyText(e.target.value)}
-                                                placeholder="Craft a personalized response from the Luminelle concierge..."
+                                                placeholder="Craft a personalized response from the StorVia concierge..."
                                                 className="w-full p-6 text-sm border border-neutral-200 rounded-2xl min-h-[120px] bg-white font-medium text-[#0a4019] shadow-[0_4px_20px_rgba(11,47,38,0.08)]"
                                             />
                                             <div className="flex justify-end gap-3">

@@ -138,7 +138,7 @@ export default function CMSPage() {
                         <div className="mt-12 p-8 bg-[#0a4019] rounded-[2rem] text-[#d3d3d3] relative overflow-hidden group shadow-xl">
                             <LayoutTemplate className="absolute right-[-10px] bottom-[-10px] w-24 h-24 text-[#d3d3d3]/5 group-hover:scale-110 transition-transform duration-1000" />
                             <h3 className="text-lg font-heading text-white font-bold mb-2">Pro Aesthetic Mode</h3>
-                            <p className="text-[#d3d3d3]/60 text-xs leading-relaxed max-w-[240px]">The current configuration is optimized for luxury retail conversion (Luminelle v2.4).</p>
+                            <p className="text-[#d3d3d3]/60 text-xs leading-relaxed max-w-[240px]">The current configuration is optimized for luxury retail conversion (StorVia v2.4).</p>
                         </div>
                     </div>
                 </div>

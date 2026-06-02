@@ -38,6 +38,8 @@ export default function MetaSetupWizard({
 
     const [oauthPopup, setOauthPopup] = useState(null);
     const [oauthPolling, setOauthPolling] = useState(false);
+    // Tracks whether the META_AUTH_SUCCESS postMessage was received before popup closed
+    const [oauthSuccessReceived, setOauthSuccessReceived] = useState(false);
 
     const [assets, setAssets] = useState({
         businesses: [],
@@ -225,7 +227,9 @@ export default function MetaSetupWizard({
         const handleOAuthMessage = async (event) => {
             if (!event?.data) return;
 
-            if (event.data?.type === "META_OAUTH_SUCCESS") {
+            // Backend posts META_AUTH_SUCCESS on successful handshake
+            if (event.data?.type === "META_AUTH_SUCCESS" || event.data?.type === "META_OAUTH_SUCCESS") {
+                setOauthSuccessReceived(true);
                 toast.success("Meta account connected successfully!");
 
                 if (oauthPopup && !oauthPopup.closed) {
@@ -242,7 +246,8 @@ export default function MetaSetupWizard({
                 setStep(2);
             }
 
-            if (event.data?.type === "META_OAUTH_ERROR") {
+            // Backend posts META_AUTH_ERROR on failure
+            if (event.data?.type === "META_AUTH_ERROR" || event.data?.type === "META_OAUTH_ERROR") {
                 toast.error(event.data?.message || "Meta OAuth failed");
 
                 if (oauthPopup && !oauthPopup.closed) {
@@ -272,6 +277,11 @@ export default function MetaSetupWizard({
             const finalOauthUrl = res?.oauthUrl || oauthUrl;
 
             if (!res?.success || !finalOauthUrl) {
+                if (res?.message?.includes("Database temporarily unavailable") || res?.message?.includes("connection")) {
+                    throw new Error("Database connection issue. Please try again in a few minutes");
+                } else if (res?.message === 'Invalid or expired token' || res?.message === 'No token provided' || res?.message === 'User not found with this token') {
+                    throw new Error("Please login again");
+                }
                 throw new Error(res?.message || "Failed to get Meta login URL");
             }
 
@@ -298,6 +308,9 @@ export default function MetaSetupWizard({
             setOauthPopup(popup);
             setOauthPolling(true);
 
+            // Reset success flag before opening a new popup
+            setOauthSuccessReceived(false);
+
             const popupCheckInterval = setInterval(async () => {
                 if (popup.closed) {
                     clearInterval(popupCheckInterval);
@@ -309,9 +322,28 @@ export default function MetaSetupWizard({
                         await refresh();
                     }
 
-                    toast.success(
-                        "Meta connection checked. Continue setup if connected."
-                    );
+                    // Check if popup closed WITHOUT receiving a success message
+                    // This is the "Can't Load URL" scenario — the popup died before completing OAuth
+                    setOauthSuccessReceived((wasSuccess) => {
+                        if (!wasSuccess) {
+                            toast(
+                                (t) => (
+                                    <span style={{ fontSize: "13px", lineHeight: "1.6" }}>
+                                        <strong>Meta popup closed without connecting.</strong><br />
+                                        If you saw <em>&quot;Can&apos;t Load URL&quot;</em> in the popup, you need to fix your Meta Developer App settings:
+                                        <ol style={{ marginTop: 6, paddingLeft: 18 }}>
+                                            <li>Go to <strong>Meta for Developers → Your App → Settings → Basic</strong></li>
+                                            <li>Add <code>localhost</code> (or your domain) to <strong>App Domains</strong></li>
+                                            <li>Go to <strong>Facebook Login → Settings</strong></li>
+                                            <li>Add <code>{process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"}/api/meta/oauth/callback</code> to <strong>Valid OAuth Redirect URIs</strong></li>
+                                        </ol>
+                                    </span>
+                                ),
+                                { duration: 12000, icon: "⚠️" }
+                            );
+                        }
+                        return wasSuccess;
+                    });
                 }
             }, 1000);
         } catch (err) {
@@ -652,7 +684,7 @@ export default function MetaSetupWizard({
                                         Secure Connection
                                     </p>
                                     <p className="text-xs text-neutral-500 mt-1">
-                                        Luminelle uses Meta&apos;s official Marketing API to securely manage your assets.
+                                        StorVia uses Meta&apos;s official Marketing API to securely manage your assets.
                                     </p>
                                 </div>
                             </div>

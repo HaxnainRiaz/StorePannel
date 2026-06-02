@@ -156,7 +156,7 @@ export default function BlogsPage() {
         content: "",
         excerpt: "",
         image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&q=80&w=1200",
-        author: "Luminelle Editorial",
+        author: "StorVia Editorial",
         readTime: "5 min read",
         category: "Skincare",
         status: "published",

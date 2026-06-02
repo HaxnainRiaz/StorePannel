@@ -272,7 +272,7 @@ export default function MetaPixelManagement({ config, refresh }) {
                                 type="text"
                                 value={manualPixelName}
                                 onChange={(e) => setManualPixelName(e.target.value)}
-                                placeholder="e.g. Luminelle Main Pixel"
+                                placeholder="e.g. StorVia Main Pixel"
                                 className="w-full bg-neutral-50 border border-neutral-100 px-4 py-3 rounded-2xl text-sm focus:border-[#0a4019] outline-none transition-all"
                             />
                         </div>

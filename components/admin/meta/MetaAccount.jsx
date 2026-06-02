@@ -12,8 +12,12 @@ export default function MetaAccount({ config, refresh }) {
 
     const handleConnect = async () => {
         const res = await adminRequest("/meta/oauth/start");
-        if (res?.success && res.data?.url) {
-            window.location.href = res.data.url;
+        if (res?.success && res.oauthUrl) {
+            window.location.href = res.oauthUrl;
+        } else if (res?.message?.includes("Database temporarily unavailable") || res?.message?.includes("connection")) {
+            toast.error("Database connection issue. Please try again in a few minutes");
+        } else if (res?.message === 'Invalid or expired token' || res?.message === 'No token provided' || res?.message === 'User not found with this token') {
+            toast.error("Please login again");
         } else {
             toast.error(res?.message || "Failed to initiate Meta login");
         }

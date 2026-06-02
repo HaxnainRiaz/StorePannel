@@ -85,7 +85,10 @@ export const AuthProvider = ({ children }) => {
 
     const login = useCallback(async (email, password) => {
         try {
-            const res = await fetch(`${API_URL}/auth/login`, {
+            const url = `${API_URL}/auth/login`;
+            console.log(`📝 Attempting login at: ${url}`);
+            
+            const res = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -93,7 +96,19 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify({ email, password }),
             });
 
+            console.log(`📊 Response status: ${res.status}`);
+            
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error(`❌ HTTP Error ${res.status}:`, errorText);
+                return {
+                    success: false,
+                    message: `Login failed: HTTP ${res.status}`,
+                };
+            }
+
             const data = await res.json();
+            console.log(`✅ Response received:`, data);
 
             if (!data.success) {
                 return {
@@ -119,10 +134,10 @@ export const AuthProvider = ({ children }) => {
 
             return { success: true };
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('❌ Login error:', error);
             return {
                 success: false,
-                message: 'Server connection error',
+                message: `Connection error: ${error.message}. Make sure backend is running on port 5000.`,
             };
         }
     }, []);

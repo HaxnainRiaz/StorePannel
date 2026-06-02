@@ -279,7 +279,7 @@ export default function AdminDashboard() {
                         </div>
 
                         <p className="text-[#6B6B6B] text-xs font-medium">
-                            Luminelle Management Suite •{" "}
+                            StorVia Management Suite •{" "}
                             <span className="text-[#0a4019] font-bold">2.4.0-PRO</span>
                         </p>
                     </div>
@@ -315,7 +315,7 @@ export default function AdminDashboard() {
                     </div>
 
                     <a
-                        href="https://luminelle.org/"
+                        href="https://storvia.org/"
                         target="_blank"
                         rel="noreferrer"
                         className="flex items-center gap-2 bg-[#0a4019] text-[#d3d3d3] px-5 py-3 rounded-2xl hover:bg-[#051712] transition-all shadow-lg shadow-[#0a4019]/20 font-bold text-xs uppercase tracking-widest active:scale-95"

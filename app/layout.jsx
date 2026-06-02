@@ -20,8 +20,8 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata = {
-  title: "Luminelle | Admin Panel",
-  description: "Administrative dashboard for Luminelle",
+  title: "StorVia | Admin Panel",
+  description: "Administrative dashboard for StorVia",
 };
 
 export default function RootLayout({ children }) {

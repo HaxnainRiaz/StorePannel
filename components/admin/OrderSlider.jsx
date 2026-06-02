@@ -186,7 +186,7 @@ export default function OrderSlider() {
                 </head>
                 <body>
                     <div class="header">
-                        <div class="logo">LUMINELLE</div>
+                        <div class="logo">STORVIA</div>
                         <div class="order-info">
                             <div style="font-size: 20px; font-weight: bold;">Order ${order.orderNumber || `#ID-${order._id.substring(18).toUpperCase()}`}</div>
                             <div style="color: #666;">${format(new Date(order.createdAt), 'MMM dd, yyyy HH:mm')}</div>

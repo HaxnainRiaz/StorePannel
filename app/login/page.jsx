@@ -32,7 +32,7 @@ export default function LoginPage() {
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-[#0a4019] text-[#d3d3d3] mb-4 shadow-xl">
                         <TreeDeciduous size={32} />
                     </div>
-                    <h1 className="font-heading text-4xl font-bold text-[#0a4019] tracking-widest uppercase">Luminelle</h1>
+                    <h1 className="font-heading text-4xl font-bold text-[#0a4019] tracking-widest uppercase">StorVia</h1>
                     <p className="text-[#B8A68A] font-medium tracking-[0.2em] uppercase text-xs mt-2">Administrative Portal</p>
                 </div>
 
@@ -89,7 +89,7 @@ export default function LoginPage() {
                 </div>
 
                 <div className="text-center mt-8">
-                    <p className="text-xs text-neutral-400">© 2026 Luminelle. Secure Environment.</p>
+                    <p className="text-xs text-neutral-400">© 2026 StorVia. Secure Environment.</p>
                 </div>
             </div>
         </div>

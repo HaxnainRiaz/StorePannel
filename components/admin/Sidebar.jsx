@@ -115,7 +115,7 @@ const Sidebar = () => {
                 <div className="flex flex-col h-full p-6">
                     <Link href="/" className="mb-8 block group">
                         <div className="text-center">
-                            <h1 className="font-heading text-2xl tracking-[0.2em] uppercase text-white group-hover:text-[#d3d3d3] transition-colors">Luminelle</h1>
+                            <h1 className="font-heading text-2xl tracking-[0.2em] uppercase text-white group-hover:text-[#d3d3d3] transition-colors">StorVia</h1>
                             <div className="h-px w-12 bg-[#d3d3d3]/50 mx-auto mt-2 scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
                             <p className="text-[10px] text-[#d3d3d3] tracking-[0.3em] uppercase mt-2 font-bold opacity-70">Admin Core</p>
                         </div>
